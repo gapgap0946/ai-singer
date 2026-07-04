@@ -1,0 +1,28 @@
+# gh CLI 本地凭证目录（沙盒可写位置，切勿提交）
+.ghtmp/
+
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# 环境变量与密钥
+.env
+.env.local
+*.key
+
+# 构建产物
+dist/
+build/
+out/
+
+# 日志
+*.log
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
