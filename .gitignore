@@ -18,6 +18,12 @@ dist/
 build/
 out/
 
+# 模型权重与处理输出（体积大，不入库，保留目录结构）
+models/rvc/*
+!models/rvc/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
 # 日志
 *.log
 

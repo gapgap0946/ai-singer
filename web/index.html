@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 翻唱智能体</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eaeaea; min-height: 100vh; display: flex;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      width: 100%; max-width: 520px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+      padding: 32px; backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    h1 { font-size: 24px; margin-bottom: 4px; }
+    .sub { color: #9aa; font-size: 13px; margin-bottom: 24px; }
+    label { display: block; font-size: 13px; margin: 16px 0 6px; color: #bcd; }
+    input[type=file], select, input[type=number] {
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.25);
+      color: #eaeaea; font-size: 14px;
+    }
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; }
+    button {
+      width: 100%; margin-top: 24px; padding: 13px; border: none;
+      border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+      background: linear-gradient(135deg, #7b2ff7, #f107a3); color: #fff;
+      transition: opacity .2s;
+    }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    #status { margin-top: 20px; font-size: 13px; white-space: pre-line;
+      color: #9df; min-height: 20px; }
+    audio { width: 100%; margin-top: 16px; }
+    a.dl { display: inline-block; margin-top: 12px; color: #f9a; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎤 AI 翻唱智能体</h1>
+    <p class="sub">上传歌曲 → 选择音色 → 一键生成翻唱</p>
+
+    <label>歌曲文件 (mp3 / wav / flac)</label>
+    <input type="file" id="file" accept="audio/*" />
+
+    <label>音色模型</label>
+    <select id="model"><option value="">加载中…</option></select>
+
+    <div class="row">
+      <div>
+        <label>变调 (半音)</label>
+        <input type="number" id="pitch" value="0" step="1" />
+      </div>
+      <div>
+        <label>检索比例</label>
+        <input type="number" id="indexRate" value="0.75" step="0.05" min="0" max="1" />
+      </div>
+      <div>
+        <label>音高算法</label>
+        <select id="f0">
+          <option value="rmvpe">rmvpe</option>
+          <option value="crepe">crepe</option>
+          <option value="pm">pm</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="go">开始翻唱</button>
+    <div id="status"></div>
+    <audio id="player" controls style="display:none"></audio>
+    <a id="dl" class="dl" style="display:none" download>⬇ 下载成品</a>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    async function loadModels() {
+      try {
+        const res = await fetch('/api/models');
+        const data = await res.json();
+        const sel = $('model');
+        sel.innerHTML = '';
+        if (!data.models.length) {
+          sel.innerHTML = '<option value="">(无模型，请放入 models/rvc/)</option>';
+          return;
+        }
+        data.models.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m; opt.textContent = m; sel.appendChild(opt);
+        });
+      } catch (e) {
+        $('status').textContent = '加载模型列表失败: ' + e;
+      }
+    }
+
+    $('go').onclick = async () => {
+      const file = $('file').files[0];
+      const model = $('model').value;
+      if (!file) { $('status').textContent = '请先选择歌曲文件'; return; }
+      if (!model) { $('status').textContent = '请先选择音色模型'; return; }
+
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('model', model);
+      fd.append('pitch', $('pitch').value);
+      fd.append('index_rate', $('indexRate').value);
+      fd.append('f0_method', $('f0').value);
+
+      $('go').disabled = true;
+      $('status').textContent = '⏳ 处理中，请稍候（分离 → 转换 → 混音）…';
+      $('player').style.display = 'none';
+      $('dl').style.display = 'none';
+
+      try {
+        const res = await fetch('/api/cover', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || '处理失败');
+        $('status').textContent = (data.steps || []).join('\n');
+        $('player').src = data.download_url;
+        $('player').style.display = 'block';
+        $('dl').href = data.download_url;
+        $('dl').style.display = 'inline-block';
+      } catch (e) {
+        $('status').textContent = '❌ ' + e.message;
+      } finally {
+        $('go').disabled = false;
+      }
+    };
+
+    loadModels();
+  </script>
+</body>
+</html>

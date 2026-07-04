@@ -1,0 +1,28 @@
+# ===== AI 翻唱智能体依赖 =====
+# 注意：PyTorch 需单独按 CUDA 版本安装，见 README：
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# 人声/伴奏分离
+demucs>=4.0.1
+
+# 歌声转换 (RVC 推理封装)
+rvc-python>=0.1.5
+
+# 音频处理
+librosa>=0.10.1
+soundfile>=0.12.1
+pydub>=0.25.1
+numpy>=1.23,<2.0
+scipy>=1.11.0
+
+# Web 后端
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# 从 HuggingFace 下载模型
+huggingface-hub>=0.23.0
+
+# 工具
+pydantic>=2.6.0
+tqdm>=4.66.0
