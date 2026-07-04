@@ -5,8 +5,12 @@
 # 人声/伴奏分离
 demucs>=4.0.1
 
-# 歌声转换 (RVC 推理封装)
-rvc-python>=0.1.5
+# 歌声转换 (RVC)
+# 注意：rvc-python 0.1.5 依赖已停止维护的 fairseq==0.12.2，在 Windows/Py3.10 无法安装。
+# 歌声转换环节请二选一（见 README「歌声转换方案」）：
+#   方案A：单独部署 RVC WebUI 整合包，本项目通过命令行调用
+#   方案B：改用 so-vits-svc-fork（纯 pip 可装，不依赖 fairseq）
+# so-vits-svc-fork>=4.1.61
 
 # 音频处理
 librosa>=0.10.1

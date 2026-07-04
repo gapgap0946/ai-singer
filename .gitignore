@@ -26,7 +26,6 @@ outputs/*
 
 # 日志
 *.log
-
 # 编辑器与系统
 .vscode/
 .idea/

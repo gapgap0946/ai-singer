@@ -66,6 +66,25 @@ models/
 
 3. 首次运行时 Demucs 会自动下载分离模型（需联网）。
 
+## 歌声转换方案（重要）
+
+> ⚠️ `rvc-python` 依赖已停止维护的 `fairseq==0.12.2`，在 Windows / Python 3.10 环境**无法安装**。
+> 因此本项目采用**解耦方案**：歌声转换环节调用你单独部署的官方 **RVC-WebUI 整合包**，
+> 我们的项目负责「人声分离 + 混音 + 编排 + Web 界面」，转换环节通过命令行调用 RVC-WebUI。
+
+### 部署 RVC-WebUI
+
+1. 下载官方整合包：[RVC-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)（推荐带 `runtime` 的 Windows 整合包）。
+2. 解压到任意目录，例如 `D:\AI\RVC-WebUI`。
+3. 在 [core/config.py](core/config.py) 中设置 `RVC_WEBUI_DIR`，或通过环境变量覆盖：
+
+```powershell
+$env:RVC_WEBUI_DIR = "D:\AI\RVC-WebUI"
+$env:RVC_PYTHON    = "D:\AI\RVC-WebUI\runtime\python.exe"
+```
+
+4. RVC 音色模型（`.pth` / `.index`）仍放在本项目 `models/rvc/<音色名>/` 下即可。
+
 ## 运行
 
 ```bash
